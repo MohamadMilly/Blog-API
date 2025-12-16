@@ -37,9 +37,6 @@ const loginPost = async (req, res) => {
     where: {
       username: username,
     },
-    include: {
-      role: true,
-    },
   });
   if (!existingUser) {
     return res.status(401).json({

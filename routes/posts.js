@@ -11,6 +11,7 @@ postsRouter.get("/", postsController.allPostsGet);
 postsRouter.get("/:slug", postsController.specificPostGet);
 postsRouter.get("/:slug/comments", postsController.allcommentsForPostGet);
 
+// post resources
 postsRouter.post("/", verifyToken, postsController.newPost_Post);
 postsRouter.post(
   "/:slug/comments",
@@ -41,7 +42,7 @@ postsRouter.patch(
 // delete resources
 postsRouter.delete("/:slug", verifyToken, postsController.deletePostDelete);
 postsRouter.delete(
-  "/:slug/comments/:commendId",
+  "/:slug/comments/:commentId",
   verifyToken,
   postsController.deleteCommentDelete
 );
