@@ -21,8 +21,27 @@ const signupPost = async (req, res) => {
         email,
       },
     });
-    return res.json({
-      message: "Your account has been created successfully.",
+    const payLoad = {
+      user: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        username: user.username,
+        password: hashedPassword,
+        email: user.email,
+        role: user.role,
+      },
+    };
+    jwt.sign(payLoad, SECRET_KEY, (err, token) => {
+      if (err) {
+        return res.json({
+          message: "Token error",
+        });
+      }
+      return res.json({
+        message: "Your account has been created successfully.",
+        token: token,
+        user: payLoad,
+      });
     });
   } catch (error) {
     return res.status(500).json({
@@ -66,7 +85,7 @@ const loginPost = async (req, res) => {
         message: "Token error",
       });
     }
-    return res.json({ token: token });
+    return res.json({ token: token, user: payload });
   });
 };
 

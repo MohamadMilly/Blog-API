@@ -7,22 +7,26 @@ const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const allPostsGet = async (req, res) => {
-  const { sort, author, category } = req.query;
+  const { sort, author, categories } = req.query;
   const orderSymbol = sort ? sort.at(0) : undefined;
   const order = orderSymbol === "+" ? "asc" : "desc";
   const sortBy = sort ? sort.slice(1) : undefined;
+  const categoriesList = categories
+    ? Array.isArray(categories)
+      ? categories
+      : categories.split(",")
+    : null;
+
   try {
     const posts = await prisma.post.findMany({
       where: {
         published: true,
         authorId: author || undefined,
-        category: category
-          ? {
-              some: {
-                title: category,
-              },
-            }
-          : undefined,
+        AND: categories
+          ? categoriesList.map((category) => ({
+              categories: { some: { title: category } },
+            }))
+          : [],
       },
       include: {
         categories: true,
