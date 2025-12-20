@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const allPostsGet = async (req, res) => {
-  const { sort, author, categories } = req.query;
+  const { sort, author, categories, slug } = req.query;
   const orderSymbol = sort ? sort.at(0) : undefined;
   const order = orderSymbol === "+" ? "asc" : "desc";
   const sortBy = sort ? sort.slice(1) : undefined;
@@ -16,6 +16,8 @@ const allPostsGet = async (req, res) => {
       ? categories
       : categories.split(",")
     : null;
+  const normalizeSlug = (s) => s.trim().toLowerCase().replace(/\s+/g, "-");
+  const slugAsDashedString = slug ? normalizeSlug(slug) : undefined;
 
   try {
     const posts = await prisma.post.findMany({
@@ -27,6 +29,12 @@ const allPostsGet = async (req, res) => {
               categories: { some: { title: category } },
             }))
           : [],
+        OR: slug
+          ? [
+              { slug: { contains: slugAsDashedString, mode: "insensitive" } },
+              { title: { contains: slug, mode: "insensitive" } },
+            ]
+          : undefined,
       },
       include: {
         categories: true,
@@ -72,6 +80,26 @@ const specificPostGet = async (req, res) => {
   }
 };
 
+/* const getPostsBySearch = async (req, res) => {
+  const query = req.params.slug;
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        slug: {
+          contains: query,
+        },
+      },
+    });
+    return res.json({
+      posts: posts || [],
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error searching for posts",
+    });
+  }
+};
+*/
 const newPost_Post = async (req, res) => {
   jwt.verify(req.token, SECRET_KEY, async (err, authData) => {
     if (err) {
@@ -141,6 +169,7 @@ const newCommentPost = async (req, res) => {
           message: "Post is not found.",
         });
       }
+
       const comment = await prisma.comment.create({
         data: {
           content: content,
@@ -149,9 +178,17 @@ const newCommentPost = async (req, res) => {
               id: post.id,
             },
           },
-          user: {
+          author: {
             connect: {
               id: user.id,
+            },
+          },
+        },
+        include: {
+          author: {
+            select: {
+              firstname: true,
+              lastname: true,
             },
           },
         },
@@ -176,7 +213,16 @@ const allcommentsForPostGet = async (req, res) => {
         slug: postSlug,
       },
       include: {
-        comments: true,
+        comments: {
+          include: {
+            author: {
+              select: {
+                firstname: true,
+                lastname: true,
+              },
+            },
+          },
+        },
       },
     });
     return res.json({

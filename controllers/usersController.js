@@ -23,8 +23,8 @@ const currentUserGet = async (req, res) => {
         username: true,
         lastname: true,
         firstname: true,
+        email: true,
         role: true,
-        profile: true,
       },
     });
     return res.json({
@@ -77,7 +77,7 @@ const updateCurrentUserProfilePatch = async (req, res) => {
 
 const changePasswordPatch = async (req, res) => {
   const token = req.token;
-  const { password, newPassword } = req.body;
+  const { password, newPassword, confirmPassword } = req.body;
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const currentUserId = authData.user.id;
@@ -96,7 +96,12 @@ const changePasswordPatch = async (req, res) => {
     const doesMatch = await bcrypt.compare(password, oldPassword);
     if (!doesMatch) {
       return res.status(400).json({
-        message: "password is incorrect",
+        message: "Password is incorrect",
+      });
+    }
+    if (confirmPassword !== newPassword) {
+      return res.status(400).json({
+        message: "Passwords do not match",
       });
     }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);

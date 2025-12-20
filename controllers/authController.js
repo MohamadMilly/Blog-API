@@ -9,9 +9,21 @@ const bcrypt = require("bcryptjs");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const signupPost = async (req, res) => {
-  const { firstname, lastname, username, password, email } = req.body;
+  const {
+    firstname,
+    lastname,
+    username,
+    password,
+    passwordConfirmation,
+    email,
+  } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
+    if (password !== passwordConfirmation) {
+      return res.status(400).json({
+        message: "password confirmation does not match",
+      });
+    }
     const user = await prisma.user.create({
       data: {
         firstname,
@@ -23,10 +35,10 @@ const signupPost = async (req, res) => {
     });
     const payLoad = {
       user: {
+        id: user.id,
         firstname: user.firstname,
         lastname: user.lastname,
         username: user.username,
-        password: hashedPassword,
         email: user.email,
         role: user.role,
       },
@@ -40,7 +52,7 @@ const signupPost = async (req, res) => {
       return res.json({
         message: "Your account has been created successfully.",
         token: token,
-        user: payLoad,
+        user: payLoad.user,
       });
     });
   } catch (error) {
@@ -75,6 +87,7 @@ const loginPost = async (req, res) => {
       firstname: existingUser.firstname,
       lastname: existingUser.lastname,
       username: existingUser.username,
+      email: existingUser.email,
       role: existingUser.role,
     },
   };
@@ -85,7 +98,7 @@ const loginPost = async (req, res) => {
         message: "Token error",
       });
     }
-    return res.json({ token: token, user: payload });
+    return res.json({ token: token, user: payload.user });
   });
 };
 

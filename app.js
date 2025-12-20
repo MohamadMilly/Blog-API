@@ -18,8 +18,14 @@ const categoriesRouter = require("./routes/categories");
 const app = express();
 
 // caching for 2 minutes
-app.use(cache("2 minutes"));
-app.use(cors());
+// app.use(cache("2 minutes"));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

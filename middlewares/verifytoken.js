@@ -1,6 +1,5 @@
 function verifyToken(req, res, next) {
   const bearerHeader = req.headers["authorization"];
-
   if (typeof bearerHeader === "undefined") {
     return res.status(403).json({
       message: "You are not authorized to do this action",
