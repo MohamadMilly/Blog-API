@@ -114,13 +114,15 @@ const newPost_Post = async (req, res) => {
       });
     }
     try {
-      const { title, content, published, categories, slug } = req.body;
+      const { title, content, published, categories, slug, featuredImageURL } =
+        req.body;
       const post = await prisma.post.create({
         data: {
           title,
           content,
           published,
           slug,
+          featuredImageURL: featuredImageURL ? featuredImageURL : null,
           categories: {
             connectOrCreate: categories.map((categoryName) => {
               return {
@@ -189,6 +191,7 @@ const newCommentPost = async (req, res) => {
             select: {
               firstname: true,
               lastname: true,
+              id: true,
             },
           },
         },
@@ -219,14 +222,27 @@ const allcommentsForPostGet = async (req, res) => {
               select: {
                 firstname: true,
                 lastname: true,
+                username: true,
+                id: true,
               },
             },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
           },
         },
       },
     });
     return res.json({
       comments: post.comments,
+      post: post,
     });
   } catch (err) {
     return res.status(500).json({
@@ -238,7 +254,8 @@ const allcommentsForPostGet = async (req, res) => {
 const updatePostPut = async (req, res) => {
   const token = req.token;
   const postSlug = req.params.slug;
-  const { title, content, published, categories, slug } = req.body;
+  const { title, content, published, categories, slug, featuredImageURL } =
+    req.body;
 
   try {
     const authData = jwt.verify(token, SECRET_KEY);
@@ -268,6 +285,7 @@ const updatePostPut = async (req, res) => {
         content,
         published,
         slug,
+        featuredImageURL: featuredImageURL ? featuredImageURL : null,
         categories: {
           set: [],
           connectOrCreate: categories.map((categoryName) => {
@@ -330,13 +348,22 @@ const updateCommentPut = async (req, res) => {
       data: {
         content: content,
       },
+      include: {
+        author: {
+          select: {
+            firstname: true,
+            lastname: true,
+            id: true,
+          },
+        },
+      },
     });
     return res.json({
       comment: updatedComment,
     });
   } catch (err) {
     return res.status(403).json({
-      message: "Invalid or expired token",
+      message: `Invalid or expired token ${err}`,
     });
   }
 };
@@ -398,7 +425,7 @@ const deleteCommentDelete = async (req, res) => {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
     const postSlug = req.params.slug;
-    const commentId = parseInt(req.params.commendId);
+    const commentId = parseInt(req.params.commentId);
 
     const post = await prisma.post.findUnique({
       where: {
@@ -435,7 +462,7 @@ const deleteCommentDelete = async (req, res) => {
     });
   } catch (err) {
     return res.status(403).json({
-      message: "Invalid or expired token.",
+      message: `Invalid or expired token.`,
     });
   }
 };

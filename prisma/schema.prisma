@@ -12,6 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -23,7 +24,7 @@ model User {
   password String
   posts Post[]
   profile Profile?
-  role Role @default(Normal)
+  role Role @default(User)
   comments Comment[]
   deleted Boolean @default(false)
   @@map("users")
@@ -46,11 +47,12 @@ model Post {
    content String
    published Boolean @default(false)
    slug String @unique
+   featuredImageURL String?
    author User @relation(fields: [authorId],references: [id])
    authorId Int
    comments Comment[]
    categories Category[]
-
+   
    @@map("posts")
 }
 
@@ -76,6 +78,6 @@ model Comment {
 }
 
 enum Role {
-Normal
+User
 Author
 }

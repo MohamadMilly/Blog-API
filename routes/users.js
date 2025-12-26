@@ -8,7 +8,8 @@ const usersController = require("../controllers/usersController");
 
 // get resources
 usersRouter.get("/me", verifyToken, usersController.currentUserGet);
-usersRouter.get("/:userId", usersController.userInfoGet);
+usersRouter.get("/id/:userId", usersController.userInfoByIdGet);
+usersRouter.get("/name/:username", usersController.userInfoByNameGet);
 
 // patch resources
 usersRouter.patch(

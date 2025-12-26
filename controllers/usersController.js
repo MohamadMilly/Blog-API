@@ -19,6 +19,7 @@ const currentUserGet = async (req, res) => {
         id: currentUserId,
       },
       select: {
+        id: true,
         profile: true,
         username: true,
         lastname: true,
@@ -148,7 +149,7 @@ const deleteAccountDelete = async (req, res) => {
   }
 };
 
-const userInfoGet = async (req, res) => {
+const userInfoByIdGet = async (req, res) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
     return res.status(400).json({ message: "Invalid user ID." });
@@ -159,12 +160,23 @@ const userInfoGet = async (req, res) => {
         id: userId,
       },
       select: {
+        id: true,
         firstname: true,
         lastname: true,
         username: true,
         role: true,
         email: true,
         profile: true,
+        deleted: true,
+        posts: {
+          take: 5,
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            published: true,
+          },
+        },
       },
     });
     if (!user) {
@@ -184,10 +196,63 @@ const userInfoGet = async (req, res) => {
   }
 };
 
+const userInfoByNameGet = async (req, res) => {
+  const username = req.params.username;
+  if (!username) {
+    return res.status(400).json({ message: "Invalid username." });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        username: true,
+        role: true,
+        email: true,
+        profile: true,
+        deleted: true,
+        posts: {
+          take: 5,
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            published: true,
+          },
+          include: {
+            categories: true,
+          },
+        },
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        message: "User is not found.",
+      });
+    }
+    if (user.deleted) {
+      user.email = null;
+      user.username = "Deleted Account";
+      user.avatar = null;
+    }
+    return res.json({ user: user });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   currentUserGet,
   updateCurrentUserProfilePatch,
   changePasswordPatch,
   deleteAccountDelete,
-  userInfoGet,
+  userInfoByIdGet,
+  userInfoByNameGet,
 };
