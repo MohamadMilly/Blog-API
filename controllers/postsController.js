@@ -38,7 +38,11 @@ const allPostsGet = async (req, res) => {
       },
       include: {
         categories: true,
-        author: true,
+        author: {
+          include: {
+            profile: true,
+          },
+        },
       },
       orderBy: sort ? { [sortBy]: order } : { createdAt: "desc" },
     });
@@ -60,7 +64,11 @@ const specificPostGet = async (req, res) => {
         slug: slug,
       },
       include: {
-        author: true,
+        author: {
+          include: {
+            profile: true,
+          },
+        },
         categories: true,
         comments: true,
       },
@@ -223,6 +231,7 @@ const allcommentsForPostGet = async (req, res) => {
                 firstname: true,
                 lastname: true,
                 username: true,
+                profile: true,
                 id: true,
               },
             },
@@ -236,6 +245,7 @@ const allcommentsForPostGet = async (req, res) => {
             id: true,
             firstname: true,
             lastname: true,
+            profile: true,
           },
         },
       },
