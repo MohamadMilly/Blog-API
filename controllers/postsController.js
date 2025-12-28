@@ -366,7 +366,7 @@ const updateCommentPut = async (req, res) => {
             lastname: true,
             username: true,
             profile: {
-              include: {
+              select: {
                 avatar: true,
               },
             },
