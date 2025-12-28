@@ -361,9 +361,13 @@ const updateCommentPut = async (req, res) => {
       include: {
         author: {
           select: {
+            id: true,
             firstname: true,
             lastname: true,
-            id: true,
+            username: true,
+            profile: {
+              avatar: true,
+            },
           },
         },
       },
