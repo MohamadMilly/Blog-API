@@ -276,7 +276,6 @@ const updatePostPut = async (req, res) => {
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
-
     const post = await prisma.post.findUnique({
       where: {
         slug: postSlug,

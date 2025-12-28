@@ -94,7 +94,7 @@ const loginPost = async (req, res) => {
 
   jwt.sign(payload, SECRET_KEY, (err, token) => {
     if (err) {
-      return res.json({
+      return res.status(500).json({
         message: "Token error",
       });
     }
@@ -102,7 +102,85 @@ const loginPost = async (req, res) => {
   });
 };
 
+const issuedCodePost = async (req, res) => {
+  const token = req.body.token;
+  try {
+    const authData = jwt.verify(token, SECRET_KEY);
+    const user = authData.user;
+    const userId = user.id;
+
+    jwt.sign(
+      {
+        id: userId,
+        purpose: "exchange",
+      },
+      SECRET_KEY,
+      { expiresIn: "60s" },
+      (err, token) => {
+        if (err) {
+          return res.status(500).json({
+            message: "Token Error",
+          });
+        }
+        return res.json({
+          tempToken: token,
+        });
+      }
+    );
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
+  }
+};
+
+const issuedCodeValidatePost = async (req, res) => {
+  const { tempToken } = req.body;
+  if (!tempToken) {
+    return res.status(401).json({
+      message: "Token is missing.",
+    });
+  }
+  try {
+    const data = jwt.verify(tempToken, SECRET_KEY);
+    if (data.purpose !== "exchange") {
+      return res.status(401).json({
+        message: "Invalid purpose.",
+      });
+    }
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+    const payload = {
+      user: {
+        id: existingUser.id,
+        firstname: existingUser.firstname,
+        lastname: existingUser.lastname,
+        username: existingUser.username,
+        email: existingUser.email,
+        role: existingUser.role,
+      },
+    };
+    jwt.sign(payload, SECRET_KEY, (err, token) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Token error",
+        });
+      }
+      return res.json({ token: token, user: payload.user });
+    });
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
+  }
+};
+
 module.exports = {
   signupPost,
   loginPost,
+  issuedCodePost,
+  issuedCodeValidatePost,
 };
