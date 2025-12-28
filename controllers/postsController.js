@@ -197,9 +197,15 @@ const newCommentPost = async (req, res) => {
         include: {
           author: {
             select: {
+              id: true,
+              username: true,
               firstname: true,
               lastname: true,
-              id: true,
+              profile: {
+                select: {
+                  avatar: true,
+                },
+              },
             },
           },
         },
