@@ -272,6 +272,9 @@ const currentUserPostsGet = async (req, res) => {
       include: {
         categories: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     return res.json({
       posts: posts,
