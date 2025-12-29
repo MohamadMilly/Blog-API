@@ -7,7 +7,10 @@ const verifyToken = require("../middlewares/verifytoken");
 const usersController = require("../controllers/usersController");
 
 // get resources
+/* -> current user resources  */
 usersRouter.get("/me", verifyToken, usersController.currentUserGet);
+usersRouter.get("/me/posts", usersController.currentUserPostsGet);
+/* -> global users resources  */
 usersRouter.get("/id/:userId", usersController.userInfoByIdGet);
 usersRouter.get("/name/:username", usersController.userInfoByNameGet);
 

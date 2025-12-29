@@ -176,6 +176,9 @@ const userInfoByIdGet = async (req, res) => {
           where: {
             published: true,
           },
+          include: {
+            categories: true,
+          },
         },
       },
     });
@@ -248,6 +251,38 @@ const userInfoByNameGet = async (req, res) => {
   }
 };
 
+const currentUserPostsGet = async (req, res) => {
+  const token = req.token;
+
+  try {
+    const authData = jwt.verify(token, SECRET_KEY);
+    const user = authData.user;
+    const userId = parseInt(user.id);
+
+    if (user.role === "User") {
+      return res.status(401).json({
+        message: "You are not an Author",
+      });
+    }
+
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: userId,
+      },
+      include: {
+        categories: true,
+      },
+    });
+    return res.json({
+      posts: posts,
+    });
+  } catch (err) {
+    return res.status(403).json({
+      message: "Invalid or expired token",
+    });
+  }
+};
+
 module.exports = {
   currentUserGet,
   updateCurrentUserProfilePatch,
@@ -255,4 +290,5 @@ module.exports = {
   deleteAccountDelete,
   userInfoByIdGet,
   userInfoByNameGet,
+  currentUserPostsGet,
 };
