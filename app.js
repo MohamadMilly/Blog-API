@@ -34,7 +34,7 @@ app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/categories", categoriesRouter);
 
-app.use(cache("2 minutes"));
+app.use(cache("30 seconds"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, (error) => {
