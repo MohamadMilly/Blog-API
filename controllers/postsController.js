@@ -577,7 +577,7 @@ const togglePublishPostsPatch = async () => {
   const token = req.token;
   const publish = req.body.publish;
   if (typeof publish !== "boolean")
-    return res.tatus(400).json({
+    return res.status(400).json({
       message: "Invalid input",
     });
   try {
