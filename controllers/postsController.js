@@ -573,7 +573,7 @@ const togglePublishPostPatch = async (req, res) => {
   }
 };
 
-const togglePublishPostsPatch = async () => {
+const togglePublishPostsPatch = async (req, res) => {
   const token = req.token;
   const publish = req.body.publish;
   if (typeof publish !== "boolean")
