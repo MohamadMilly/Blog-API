@@ -568,6 +568,54 @@ const unpublishPostPatch = async (req, res) => {
   }
 };
 
+const publishAllPostsPatch = async () => {
+  const token = req.token;
+  try {
+    const authData = jwt.verify(token, SECRET_KEY);
+    const user = authData.user;
+
+    const updatedPosts = await prisma.post.updateManyAndReturn({
+      where: {
+        authorId: user.id,
+      },
+      data: {
+        published: true,
+      },
+    });
+    return res.json({
+      posts: updatedPosts,
+    });
+  } catch (err) {
+    return res.status(403).json({
+      message: "Invalid or expired token.",
+    });
+  }
+};
+
+const unPublishAllPostsPatch = async () => {
+  const token = req.token;
+  try {
+    const authData = jwt.verify(token, SECRET_KEY);
+    const user = authData.user;
+
+    const updatedPosts = await prisma.post.updateManyAndReturn({
+      where: {
+        authorId: user.id,
+      },
+      data: {
+        published: false,
+      },
+    });
+    return res.json({
+      posts: updatedPosts,
+    });
+  } catch (err) {
+    return res.status(403).json({
+      message: "Invalid or expired token.",
+    });
+  }
+};
+
 module.exports = {
   allPostsGet,
   newPost_Post,
@@ -580,4 +628,6 @@ module.exports = {
   deleteCommentDelete,
   publishPostPatch,
   unpublishPostPatch,
+  publishAllPostsPatch,
+  unPublishAllPostsPatch,
 };

@@ -38,6 +38,16 @@ postsRouter.patch(
   verifyToken,
   postsController.unpublishPostPatch
 );
+postsRouter.patch(
+  "/publish",
+  verifyToken,
+  postsController.publishAllPostsPatch
+);
+postsController.patch(
+  "/unpublish",
+  verifyToken,
+  postsController.unPublishAllPostsPatch
+);
 
 // delete resources
 postsRouter.delete("/:slug", verifyToken, postsController.deletePostDelete);
