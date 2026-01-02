@@ -531,7 +531,7 @@ const publishPostPatch = async (req, res) => {
 const togglePublishPostPatch = async (req, res) => {
   const token = req.token;
   const postSlug = req.params.slug;
-  const publish = req.query.publish;
+  const publish = req.body.publish;
   if (typeof publish !== "boolean")
     return res.status(400).json({
       message: "Invalid input.",
@@ -575,7 +575,7 @@ const togglePublishPostPatch = async (req, res) => {
 
 const togglePublishPostsPatch = async () => {
   const token = req.token;
-  const publish = req.query.publish;
+  const publish = req.body.publish;
   if (typeof publish !== "boolean")
     return res.tatus(400).json({
       message: "Invalid input",
