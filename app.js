@@ -18,7 +18,7 @@ const categoriesRouter = require("./routes/categories");
 const app = express();
 
 // caching for 2 minutes
-app.use(cache("2 minutes"));
+
 app.use(
   cors({
     origin: "*",
@@ -33,6 +33,8 @@ app.use("/auth", authRouter);
 app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/categories", categoriesRouter);
+
+app.use(cache("2 minutes"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, (error) => {
