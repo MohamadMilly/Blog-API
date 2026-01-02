@@ -591,9 +591,6 @@ const togglePublishPostsPatch = async (req, res) => {
       data: {
         published: publish,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     });
     return res.json({
       posts: updatedPosts,
