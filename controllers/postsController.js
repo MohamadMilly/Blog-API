@@ -528,9 +528,14 @@ const publishPostPatch = async (req, res) => {
   }
 };
 
-const unpublishPostPatch = async (req, res) => {
+const togglePublishPostPatch = async (req, res) => {
   const token = req.token;
   const postSlug = req.params.slug;
+  const publish = req.query.publish;
+  if (typeof publish !== "boolean")
+    return res.status(400).json({
+      message: "Invalid input.",
+    });
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
@@ -555,7 +560,7 @@ const unpublishPostPatch = async (req, res) => {
         slug: postSlug,
       },
       data: {
-        published: false,
+        published: publish,
       },
     });
     return res.json({
@@ -568,8 +573,13 @@ const unpublishPostPatch = async (req, res) => {
   }
 };
 
-const publishAllPostsPatch = async () => {
+const togglePublishPostsPatch = async () => {
   const token = req.token;
+  const publish = req.query.publish;
+  if (typeof publish !== "boolean")
+    return res.tatus(400).json({
+      message: "Invalid input",
+    });
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
@@ -579,31 +589,7 @@ const publishAllPostsPatch = async () => {
         authorId: user.id,
       },
       data: {
-        published: true,
-      },
-    });
-    return res.json({
-      posts: updatedPosts,
-    });
-  } catch (err) {
-    return res.status(403).json({
-      message: "Invalid or expired token.",
-    });
-  }
-};
-
-const unPublishAllPostsPatch = async () => {
-  const token = req.token;
-  try {
-    const authData = jwt.verify(token, SECRET_KEY);
-    const user = authData.user;
-
-    const updatedPosts = await prisma.post.updateManyAndReturn({
-      where: {
-        authorId: user.id,
-      },
-      data: {
-        published: false,
+        published: publish,
       },
     });
     return res.json({
@@ -627,7 +613,6 @@ module.exports = {
   deletePostDelete,
   deleteCommentDelete,
   publishPostPatch,
-  unpublishPostPatch,
-  publishAllPostsPatch,
-  unPublishAllPostsPatch,
+  togglePublishPostPatch,
+  togglePublishPostsPatch,
 };

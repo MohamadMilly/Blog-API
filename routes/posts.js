@@ -29,25 +29,11 @@ postsRouter.put(
 
 // patch resoruces
 postsRouter.patch(
-  "/:slug/publish",
+  "/:slug",
   verifyToken,
-  postsController.publishPostPatch
+  postsController.togglePublishPostPatch
 );
-postsRouter.patch(
-  "/:slug/unpublish",
-  verifyToken,
-  postsController.unpublishPostPatch
-);
-postsRouter.patch(
-  "/publish",
-  verifyToken,
-  postsController.publishAllPostsPatch
-);
-postsController.patch(
-  "/unpublish",
-  verifyToken,
-  postsController.unPublishAllPostsPatch
-);
+postsRouter.patch("/", verifyToken, postsController.togglePublishPostsPatch);
 
 // delete resources
 postsRouter.delete("/:slug", verifyToken, postsController.deletePostDelete);
