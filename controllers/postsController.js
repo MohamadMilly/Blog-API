@@ -169,6 +169,12 @@ const newCommentPost = async (req, res) => {
       const { content } = req.body;
       const postSlug = req.params.slug;
       const user = authData.user;
+      let isCancelled = false;
+      req.on("close", () => {
+        console.log("The client has aborted the request");
+        isCancelled = true;
+      });
+
       const post = await prisma.post.findUnique({
         where: {
           slug: postSlug,
@@ -179,12 +185,8 @@ const newCommentPost = async (req, res) => {
           message: "Post is not found.",
         });
       }
-      let isCanceled = false;
-      req.on("close", () => {
-        console.log("The client has aborted the request");
-        isCanceled = true;
-      });
-      if (isCanceled) return;
+      if (isCancelled) return;
+
       const comment = await prisma.comment.create({
         data: {
           content: content,
@@ -215,6 +217,7 @@ const newCommentPost = async (req, res) => {
           },
         },
       });
+      if (isCancelled) return;
       return res.json({
         comment: comment,
         post: post,
