@@ -159,75 +159,70 @@ const newPost_Post = async (req, res) => {
 
 const newCommentPost = async (req, res) => {
   const token = req.token;
-  jwt.verify(token, SECRET_KEY, async (err, authData) => {
-    if (err) {
-      return res.status(403).json({
-        message: "You are not authorized to comment - invalid or expired token",
+  try {
+    const authData = jwt.verify(token, SECRET_KEY);
+    const user = authData.user;
+
+    const { content } = req.body;
+    const postSlug = req.params.slug;
+    let isCancelled = false;
+    req.on("close", () => {
+      console.log("The client has aborted the request");
+      isCancelled = true;
+    });
+
+    const post = await prisma.post.findUnique({
+      where: {
+        slug: postSlug,
+      },
+    });
+    if (!post) {
+      return res.status(404).json({
+        message: "Post is not found.",
       });
     }
-    try {
-      const { content } = req.body;
-      const postSlug = req.params.slug;
-      const user = authData.user;
-      let isCancelled = false;
-      req.on("close", () => {
-        console.log("The client has aborted the request");
-        isCancelled = true;
-      });
+    if (isCancelled) return;
 
-      const post = await prisma.post.findUnique({
-        where: {
-          slug: postSlug,
-        },
-      });
-      if (!post) {
-        return res.status(404).json({
-          message: "Post is not found.",
-        });
-      }
-      if (isCancelled) return;
-
-      const comment = await prisma.comment.create({
-        data: {
-          content: content,
-          post: {
-            connect: {
-              id: post.id,
-            },
-          },
-          author: {
-            connect: {
-              id: user.id,
-            },
+    const comment = await prisma.comment.create({
+      data: {
+        content: content,
+        post: {
+          connect: {
+            id: post.id,
           },
         },
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-              firstname: true,
-              lastname: true,
-              profile: {
-                select: {
-                  avatar: true,
-                },
+        author: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            firstname: true,
+            lastname: true,
+            profile: {
+              select: {
+                avatar: true,
               },
             },
           },
         },
-      });
-      if (isCancelled) return;
-      return res.json({
-        comment: comment,
-        post: post,
-      });
-    } catch (err) {
-      return res.status(500).json({
-        message: `Unexpected Error has happened while creating the comment, ${err.message}`,
-      });
-    }
-  });
+      },
+    });
+    if (isCancelled) return;
+    return res.json({
+      comment: comment,
+      post: post,
+    });
+  } catch (err) {
+    return res.status(403).json({
+      message: "Invalid or expired token",
+    });
+  }
 };
 
 const allcommentsForPostGet = async (req, res) => {
