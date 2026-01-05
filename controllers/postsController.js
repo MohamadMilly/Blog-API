@@ -179,7 +179,12 @@ const newCommentPost = async (req, res) => {
           message: "Post is not found.",
         });
       }
-
+      let isCanceled = false;
+      req.on("close", () => {
+        console.log("The client has aborted the request");
+        isCanceled = true;
+      });
+      if (isCanceled) return;
       const comment = await prisma.comment.create({
         data: {
           content: content,
