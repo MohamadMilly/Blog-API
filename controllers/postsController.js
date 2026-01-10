@@ -110,6 +110,7 @@ const specificPostGet = async (req, res) => {
   }
 };
 */
+
 const newPost_Post = async (req, res) => {
   jwt.verify(req.token, SECRET_KEY, async (err, authData) => {
     if (err) {
