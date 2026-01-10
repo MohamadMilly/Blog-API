@@ -6,9 +6,17 @@ const jwt = require("jsonwebtoken"); // jsonwebtoken
 // bcrypt for hashing
 const bcrypt = require("bcryptjs");
 
+const { validationResult, matchedData } = require("express-validator");
+
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const signupPost = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
   const {
     firstname,
     lastname,
@@ -16,14 +24,9 @@ const signupPost = async (req, res) => {
     password,
     passwordConfirmation,
     email,
-  } = req.body;
+  } = matchedData(req);
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    if (password !== passwordConfirmation) {
-      return res.status(400).json({
-        message: "password confirmation does not match",
-      });
-    }
     const user = await prisma.user.create({
       data: {
         firstname,

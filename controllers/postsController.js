@@ -4,6 +4,8 @@ const prisma = require("../lib/prisma");
 
 const jwt = require("jsonwebtoken");
 
+const { matchedData, validationResult } = require("express-validator");
+
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const allPostsGet = async (req, res) => {
@@ -121,9 +123,15 @@ const newPost_Post = async (req, res) => {
         message: "You're not authorized to post",
       });
     }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+    const { title, content, published, categories, slug, featuredImageURL } =
+      matchedData(req);
     try {
-      const { title, content, published, categories, slug, featuredImageURL } =
-        req.body;
       const post = await prisma.post.create({
         data: {
           title,
@@ -162,9 +170,15 @@ const newCommentPost = async (req, res) => {
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
-
-    const { content } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+    const { content } = matchedData(req);
     const postSlug = req.params.slug;
+
     let isAborted = false;
     req.on("aborted", () => {
       console.log("The client has aborted the request");
@@ -273,8 +287,14 @@ const allcommentsForPostGet = async (req, res) => {
 const updatePostPut = async (req, res) => {
   const token = req.token;
   const postSlug = req.params.slug;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
   const { title, content, published, categories, slug, featuredImageURL } =
-    req.body;
+    matchedData(req);
 
   try {
     const authData = jwt.verify(token, SECRET_KEY);
@@ -327,12 +347,19 @@ const updatePostPut = async (req, res) => {
 
 const updateCommentPut = async (req, res) => {
   const token = req.token;
-  const { content } = req.body;
-  const postSlug = req.params.slug;
-  const commentId = req.params.commentId;
+
   try {
     const authData = jwt.verify(token, SECRET_KEY);
     const user = authData.user;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    }
+    const { content } = matchedData(req);
+    const postSlug = req.params.slug;
+    const commentId = req.params.commentId;
 
     const post = await prisma.post.findUnique({
       where: {
