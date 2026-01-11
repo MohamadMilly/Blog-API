@@ -3,16 +3,19 @@ const { body } = require("express-validator");
 const errorMessages = require("../utils/errorMessages");
 
 const validateTitle = body("title")
+  .trim()
   .notEmpty()
   .withMessage(`Title ${errorMessages.emptyErrorMessage}`);
 
 const validateSlug = body("slug")
+  .trim()
   .notEmpty()
   .withMessage(`Slug ${errorMessages.emptyErrorMessage}`)
   .isSlug()
   .withMessage(`Slug field ${errorMessages.notSlugErrorMessage}`);
 
 const validateContent = body("content")
+  .trim()
   .notEmpty()
   .withMessage(`Content ${errorMessages.emptyErrorMessage}`)
   .isLength({ min: 200 })

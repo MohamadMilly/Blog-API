@@ -5,16 +5,19 @@ const errorMessages = require("../utils/errorMessages");
 const prisma = require("../lib/prisma");
 
 const validateFirstName = body("firstname")
+  .trim()
   .notEmpty()
   .withMessage(`Firstname ${errorMessages.emptyErrorMessage}`)
   .isAlpha()
   .withMessage(`Firstname ${errorMessages.notAlphaErrorMessage}`);
 const validateLastName = body("lastname")
+  .trim()
   .notEmpty()
   .withMessage(`Lastname ${errorMessages.emptyErrorMessage}`)
   .isAlpha()
   .withMessage(`Lastname ${errorMessages.notAlphaErrorMessage}`);
 const validateUserName = body("username")
+  .trim()
   .notEmpty()
   .withMessage(`Username ${errorMessages.emptyErrorMessage}`)
   .isAlphanumeric()
@@ -61,3 +64,5 @@ const validateSignUp = [
   validatePassword,
   validatePasswordConfirmation,
 ];
+
+module.exports = validateSignUp;
