@@ -28,7 +28,8 @@ const validatePublished = body("published")
   .withMessage(`Publish state ${errorMessages.notBooleanErrorMessage}`);
 
 const validateFeaturedImageURL = body("featuredImageURL")
-  .isURL()
+  .optional({ checkFalsy: true })
+  .isURL({ require_protocol: true })
   .withMessage(`Featured image URL ${errorMessages.notURLErrorMessage}`);
 
 const validateCategories = body("categories")
