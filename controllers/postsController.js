@@ -9,7 +9,7 @@ const { matchedData, validationResult } = require("express-validator");
 const SECRET_KEY = process.env.SECRET_KEY;
 
 const allPostsGet = async (req, res) => {
-  const { sort, author, categories, slug } = req.query;
+  const { sort, author, categories, slug, page } = req.query;
   const orderSymbol = sort ? sort.at(0) : undefined;
   const order = orderSymbol === "+" ? "asc" : "desc";
   const sortBy = sort ? sort.slice(1) : undefined;
@@ -47,6 +47,8 @@ const allPostsGet = async (req, res) => {
         },
       },
       orderBy: sort ? { [sortBy]: order } : { createdAt: "desc" },
+      skip: page ? page * 5 : 0,
+      take: 5,
     });
     return res.json({
       posts: posts,
