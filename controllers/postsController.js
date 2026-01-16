@@ -49,9 +49,9 @@ const allPostsGet = async (req, res) => {
       orderBy: sort ? { [sortBy]: order } : { createdAt: "desc" },
       take: 5,
       skip: currentCursor ? 1 : 0,
-      cursor: currentCursor ? { id: currentCursor } : null,
+      cursor: currentCursor ? { id: currentCursor } : undefined,
     });
-    const nextcursor = posts[4].id;
+    const nextcursor = posts.length > 0 ? posts[posts.length - 1].id : null;
     return res.json({
       posts: posts,
       nextcursor,
