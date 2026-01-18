@@ -514,9 +514,7 @@ const deleteCommentDelete = async (req, res) => {
         id: commentId,
       },
     });
-    return res.json({
-      comment: deletedComment,
-    });
+    return res.status(204).send();
   } catch (err) {
     return res.status(403).json({
       message: `Invalid or expired token.`,
